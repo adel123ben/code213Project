@@ -23,7 +23,7 @@ app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
 const db = require('./config/db')
-const dburl = process.env.DB_DEV_URL
+const dburl = process.env.DB_PROD_URL
 
 app.get('/', (req, res) => {
     res.send('Hello from postman!')
