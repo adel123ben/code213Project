@@ -8,7 +8,7 @@ const bodyParser = require('body-parser')
 const Blog = require('./models/blog')
 const joi = require('joi')
 const User = require('./models/user')
-const bcrypt = require('bcrypt')
+// const bcrypt = require('bcrypt')
 const JWT = require('jsonwebtoken')
 const {verifyLogin} = require('./middleware/auth')
 const upload = require('./middleware/upload')
@@ -111,9 +111,9 @@ app.post('/auth/register', async (req, res) => {
         if(iftheemailexiste){
             return res.status(400).json({ msg: "user already exist" });
         }
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-            const newUser = new User({name, username, email, password: hashedPassword});
+        // const salt = await bcrypt.genSalt(10);
+        // const hashedPassword = await bcrypt.hash(password, salt);
+            const newUser = new User({name, username, email, password});
             const saveUser = await newUser.save();
         if(error) return res.status(400).json({ msg: error.message });
         return res.status(201).json({ msg: "user created", data: saveUser });
@@ -135,10 +135,10 @@ app.post('/auth/login', async (req, res) => {
              res.status(404).json({ msg: "user not found" });
         }
     
-        const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch){
-            return res.status(400).json({ msg: "invalid credentials" });
-        }
+        // const isMatch = await bcrypt.compare(password, user.password);
+        // if(!isMatch){
+        //     return res.status(400).json({ msg: "invalid credentials" });
+        // }
 
         // GENERATE Toten
         const token = JWT.sign({id: user._id}, process.env.JWT_SECRET, {
