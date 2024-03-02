@@ -12,6 +12,7 @@ const bcrypt = require('bcrypt')
 const JWT = require('jsonwebtoken')
 const {verifyLogin} = require('./middleware/auth')
 const upload = require('./middleware/upload')
+const Likes = require('./models/likes')
 
 
 
@@ -45,14 +46,36 @@ app.get('/blog', async (req, res) => {
 
 app.post('/blog/add',upload.single('image'), async (req, res) => {
     try{
-        const { title, description, author, image } = req.body;
+        const { title, description, author, image, likes } = req.body;
         const imageLink = req.protocol + '://' + req.get('host') + '/uploads/' + req.file.filename;
         let exictingBlog = await Blog.findOne({ title });
         if(exictingBlog) return res.status(400).json({ msg: "Blog already exist" });
-        const newBlog = new Blog({ title, description, author, image: imageLink });
+        const newBlog = new Blog({ title, description, likes ,author, image: imageLink });
         const savedBlog = await newBlog.save();
         if(!title) return res.status(400).json({ msg: "Title is required" });
       return  res.status(201).json({ msg: "Blog created with success", data: savedBlog });
+    }catch(err){
+        res.status(500).json({ msg: "can't create blog", err: err.message });
+    }
+})
+
+app.post('/blog/add-like', async (req, res) => {
+    try{
+        const id = req.body.id;
+        const blog = await Blog.findById(id);
+        const userId = req.body.userId;
+        if(!blog) return res.status(404).json({ msg: "Blog not found" });
+
+        const like = await Likes.findOne({ user: userId, blog: blog._id });
+        if(like) {
+            await Likes.deleteOne({ user: userId, blog: blog._id });
+        }
+        const newLike = new Likes({ user: userId, blog: blog._id });
+        const savedLike = await newLike.save();
+        blog.likes = blog.likes + 1;
+        await blog.save();
+
+        res.status(200).json({ data: savedLike });
     }catch(err){
         res.status(500).json({ msg: "can't create blog", err: err.message });
     }
